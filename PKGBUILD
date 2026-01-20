@@ -35,7 +35,7 @@ options=(
 )
 
 build() {
-  cd "$srcdir"
+  cd "$srcdir/arturo-$pkgver"
   nim build.nims -l
 }
 
