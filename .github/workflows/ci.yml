@@ -31,6 +31,8 @@ jobs:
         shell: msys2 {0}
         run: |
           set -euxo pipefail
+          dos2unix PKGBUILD
+          dos2unix arturo.install
           MINGW_ARCH=mingw64 makepkg-mingw -sif --noconfirm --noprogressbar --skippgpcheck
 
       - name: Run arturo -v
