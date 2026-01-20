@@ -39,4 +39,5 @@ jobs:
         shell: msys2 {0}
         run: |
           set -euxo pipefail
+          . "$HOME/.bashrc"
           arturo -v
