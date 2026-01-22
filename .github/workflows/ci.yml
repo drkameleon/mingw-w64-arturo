@@ -35,8 +35,132 @@ jobs:
           dos2unix arturo.install
           MINGW_ARCH=mingw64 makepkg-mingw -sif --noconfirm --noprogressbar --skippgpcheck
 
-      - name: Run arturo -v
+      - name: Debug and verify installation
         shell: msys2 {0}
         run: |
           set -euxo pipefail
-          ~/.arturo/bin/arturo.exe -v
+          
+          echo "============================================"
+          echo "ENVIRONMENT VARIABLES"
+          echo "============================================"
+          echo "HOME: $HOME"
+          echo "USER: $USER"
+          echo "PWD: $(pwd)"
+          echo "PATH: $PATH"
+          echo ""
+          
+          echo "============================================"
+          echo "HOME DIRECTORY RESOLUTION"
+          echo "============================================"
+          echo "~ expands to:"
+          cd ~ && pwd
+          echo "realpath of ~: $(realpath ~)"
+          echo ""
+          
+          echo "============================================"
+          echo "CHECK ~/.arturo DIRECTORY"
+          echo "============================================"
+          if [ -d ~/.arturo ]; then
+            echo "~/.arturo exists"
+            ls -la ~/.arturo/
+          else
+            echo "~/.arturo DOES NOT EXIST"
+          fi
+          echo ""
+          
+          echo "============================================"
+          echo "CHECK ~/.arturo/bin DIRECTORY"
+          echo "============================================"
+          if [ -d ~/.arturo/bin ]; then
+            echo "~/.arturo/bin exists"
+            ls -la ~/.arturo/bin/
+          else
+            echo "~/.arturo/bin DOES NOT EXIST"
+          fi
+          echo ""
+          
+          echo "============================================"
+          echo "CHECK ARTURO.EXE FILE"
+          echo "============================================"
+          if [ -f ~/.arturo/bin/arturo.exe ]; then
+            echo "~/.arturo/bin/arturo.exe EXISTS"
+            echo "File info:"
+            ls -lh ~/.arturo/bin/arturo.exe
+            echo "File type:"
+            file ~/.arturo/bin/arturo.exe
+            echo "Permissions:"
+            stat -c "%a %n" ~/.arturo/bin/arturo.exe
+            echo "Executable check:"
+            test -x ~/.arturo/bin/arturo.exe && echo "File IS executable" || echo "File is NOT executable"
+          else
+            echo "~/.arturo/bin/arturo.exe DOES NOT EXIST"
+          fi
+          echo ""
+          
+          echo "============================================"
+          echo "PACMAN PACKAGE INFO"
+          echo "============================================"
+          echo "Installed files from arturo package:"
+          pacman -Ql arturo
+          echo ""
+          
+          echo "============================================"
+          echo "SEARCH FOR ARTURO.EXE ANYWHERE"
+          echo "============================================"
+          echo "Looking in common locations:"
+          find /opt -name "arturo.exe" 2>/dev/null || echo "Not found in /opt"
+          find /usr -name "arturo.exe" 2>/dev/null || echo "Not found in /usr"
+          find /mingw64 -name "arturo.exe" 2>/dev/null || echo "Not found in /mingw64"
+          find "$HOME" -name "arturo.exe" 2>/dev/null || echo "Not found in HOME"
+          echo ""
+          
+          echo "============================================"
+          echo "CHECK IF arturo.exe IS IN PATH"
+          echo "============================================"
+          which arturo.exe || echo "arturo.exe not found in PATH"
+          echo ""
+          
+          echo "============================================"
+          echo "ATTEMPT TO RUN ARTURO WITH DIFFERENT PATHS"
+          echo "============================================"
+          
+          echo "Attempt 1: ~/.arturo/bin/arturo.exe -v"
+          ~/.arturo/bin/arturo.exe -v 2>&1 || echo "EXIT CODE: $?"
+          echo ""
+          
+          echo "Attempt 2: \$HOME/.arturo/bin/arturo.exe -v"
+          $HOME/.arturo/bin/arturo.exe -v 2>&1 || echo "EXIT CODE: $?"
+          echo ""
+          
+          echo "Attempt 3: Full path with HOME variable"
+          "${HOME}/.arturo/bin/arturo.exe" -v 2>&1 || echo "EXIT CODE: $?"
+          echo ""
+          
+          echo "Attempt 4: If found by which"
+          if which arturo.exe >/dev/null 2>&1; then
+            arturo.exe -v 2>&1 || echo "EXIT CODE: $?"
+          else
+            echo "Skipped - not in PATH"
+          fi
+          echo ""
+          
+          echo "============================================"
+          echo "CHECK DLL DEPENDENCIES"
+          echo "============================================"
+          if [ -f ~/.arturo/bin/arturo.exe ]; then
+            echo "DLL dependencies:"
+            ldd ~/.arturo/bin/arturo.exe 2>&1 || echo "ldd failed"
+          fi
+          echo ""
+          
+          echo "============================================"
+          echo "FINAL VERIFICATION ATTEMPT"
+          echo "============================================"
+          if [ -f ~/.arturo/bin/arturo.exe ] && [ -x ~/.arturo/bin/arturo.exe ]; then
+            echo "File exists and is executable, attempting to run..."
+            ~/.arturo/bin/arturo.exe -v
+            echo "SUCCESS!"
+          else
+            echo "FAILED: File does not exist or is not executable"
+            exit 1
+          fi
