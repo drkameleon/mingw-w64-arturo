@@ -45,8 +45,8 @@ prepare() {
   cmd //C build_all.bat
   
   # Build webview.dll
-  cd "$srcdir/arturo-$pkgver/src/extras/webview/deps"
-  cmd //C build-new.bat deps build
+  cd "$srcdir/arturo-$pkgver/src/extras/webview"
+  cmd //C deps/build.bat deps build
   
   # Create the dlls directory structure if it doesn't exist
   mkdir -p "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64"
