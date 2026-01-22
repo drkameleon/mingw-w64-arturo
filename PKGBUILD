@@ -9,7 +9,6 @@ url="https://arturo-lang.io/"
 license=("spdx:MIT")
 purl=("pkg:github/arturo-lang/arturo@v${pkgver}")
 
-
 msys2_repository_url="https://github.com/arturo-lang/arturo"
 mingw_arch=('mingw64')
 
@@ -44,6 +43,16 @@ prepare() {
   cd "$srcdir/Nim"
   git checkout v2.2.6
   cmd //C build_all.bat
+  
+  # Build webview.dll
+  cd "$srcdir/arturo-$pkgver/src/extras/webview/deps"
+  cmd //C build-new.bat deps build
+  
+  # Create the dlls directory structure if it doesn't exist
+  mkdir -p "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64"
+  
+  # Copy the generated webview.dll to the expected location
+  cp build/library/webview.dll "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64/"
 }
 
 build() {
@@ -63,8 +72,6 @@ package() {
     libmpfr-6.dll
     libwinpthread-1.dll
     libsqlite3-0.dll
-    #webview.dll
-    #WebView2Loader.dll
   )
 
   for dll in "${dlls[@]}"; do
@@ -73,10 +80,16 @@ package() {
     fi
   done
 
+  # Copy webview DLLs built in prepare()
   cp "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64/webview.dll" "$bindir/"
-  cp "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64/WebView2Loader.dll" "$bindir/"
+  
+  # Copy WebView2Loader.dll from system or from deps
+  if [ -f "/mingw64/bin/WebView2Loader.dll" ]; then
+    cp "/mingw64/bin/WebView2Loader.dll" "$bindir/"
+  elif [ -f "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64/WebView2Loader.dll" ]; then
+    cp "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64/WebView2Loader.dll" "$bindir/"
+  fi
 
   # Rename sqlite3 DLL
   mv "$bindir/libsqlite3-0.dll" "$bindir/sqlite3_64.dll"
-
 }
