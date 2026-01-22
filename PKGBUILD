@@ -44,15 +44,9 @@ prepare() {
   git checkout v2.2.6
   cmd //C build_all.bat
   
-  # Build webview.dll
-  cd "$srcdir/arturo-$pkgver/src/extras/webview"
-  cmd //C deps/build.bat deps build
-  
-  # Create the dlls directory structure if it doesn't exist
-  mkdir -p "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64"
-  
-  # Copy the generated webview.dll to the expected location
-  cp build/library/webview.dll "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64/"
+  # Build webview.dll using the existing build script
+  cd "$srcdir/arturo-$pkgver/src/extras/webview/deps"
+  cmd //C build.bat
 }
 
 build() {
