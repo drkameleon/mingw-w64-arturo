@@ -63,8 +63,8 @@ package() {
     libmpfr-6.dll
     libwinpthread-1.dll
     libsqlite3-0.dll
-    webview.dll
-    WebView2Loader.dll
+    #webview.dll
+    #WebView2Loader.dll
   )
 
   for dll in "${dlls[@]}"; do
@@ -72,6 +72,9 @@ package() {
       cp "/mingw64/bin/$dll" "$bindir/"
     fi
   done
+
+  cp "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64/webview.dll" "$bindir/"
+  cp "$srcdir/arturo-$pkgver/src/extras/webview/deps/dlls/x64/WebView2Loader.dll" "$bindir/"
 
   # Rename sqlite3 DLL
   mv "$bindir/libsqlite3-0.dll" "$bindir/sqlite3_64.dll"
