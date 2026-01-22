@@ -39,4 +39,4 @@ jobs:
         shell: msys2 {0}
         run: |
           set -euxo pipefail
-          ~/.arturo/bin/arturo -v
+          ~/.arturo/bin/arturo.exe -v
